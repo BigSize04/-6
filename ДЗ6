@@ -1,0 +1,127 @@
+#include <iostream>
+using namespace std;
+
+const int SIZE = 9;
+
+
+void analyzeArray(int* arr, int size, int& max, int& min, float& avg) {
+    max = min = *arr;
+    int sum = 0;
+    for (int* p = arr; p < arr + size; ++p) {
+        if (*p > max) max = *p;
+        if (*p < min) min = *p;
+        sum += *p;
+    }
+    avg = static_cast<float>(sum) / size;
+}
+
+void reverse(int* arr, int size) {
+    for (int* left = arr, *right = arr + size - 1; left < right; ++left, --right)
+        swap(*left, *right);
+}
+
+void swapEvenOdd(int* arr, int size) {
+    for (int i = 0; i + 1 < size; i += 2)
+        swap(*(arr + i), *(arr + i + 1));
+}
+
+void shiftLeftRecursive(int* arr, int size, int shifts) {
+    if (shifts == 0 || size <= 1) return;
+    int first = *arr;
+    for (int i = 0; i < size - 1; ++i)
+        *(arr + i) = *(arr + i + 1);
+    *(arr + size - 1) = first;
+    shiftLeftRecursive(arr, size, shifts - 1);
+}
+
+void bubbleSort(int* arr, int size) {
+    for (int i = 0; i < size - 1; ++i)
+        for (int* p = arr; p < arr + size - 1 - i; ++p)
+            if (*p > *(p + 1)) swap(*p, *(p + 1));
+}
+
+int** createSudokuGrid() {
+    int** grid = new int* [SIZE];
+    for (int i = 0; i < SIZE; ++i)
+        grid[i] = new int[SIZE] {};
+    return grid;
+}
+
+void deleteSudokuGrid(int** grid) {
+    for (int i = 0; i < SIZE; ++i)
+        delete[] grid[i];
+    delete[] grid;
+}
+
+bool isValidInRow(int** grid, int row, int val) {
+    for (int i = 0; i < SIZE; ++i)
+        if (grid[row][i] == val) return false;
+    return true;
+}
+
+bool isValidInCol(int** grid, int col, int val) {
+    for (int i = 0; i < SIZE; ++i)
+        if (grid[i][col] == val) return false;
+    return true;
+}
+
+bool isValidInBox(int** grid, int startRow, int startCol, int val) {
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            if (grid[startRow + i][startCol + j] == val) return false;
+    return true;
+}
+
+bool isValidMove(int** grid, int row, int col, int val) {
+    return isValidInRow(grid, row, val) &&
+        isValidInCol(grid, col, val) &&
+        isValidInBox(grid, row - row % 3, col - col % 3, val);
+}
+
+void inputCell(int** grid, int row, int col, int val) {
+    if (isValidMove(grid, row, col, val))
+        grid[row][col] = val;
+    else
+        cout << "❌ Невірний хід для (" << row << ", " << col << "): " << val << endl;
+}
+
+void printGrid(int** grid) {
+    for (int i = 0; i < SIZE; ++i) {
+        for (int j = 0; j < SIZE; ++j) {
+            if (grid[i][j] == 0)
+                cout << ". ";
+            else
+                cout << grid[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+int main() {
+    setlocale(0, "ru");
+    int arr[] = { 3, 7, 1, 9, 4 };
+    int size = 5, max, min;
+    float avg;
+
+    analyzeArray(arr, size, max, min, avg);
+    cout << "Max: " << max << ", Min: " << min << ", Avg: " << avg << endl;
+
+    reverse(arr, size);
+    cout << "Reverse: "; for (int i = 0; i < size; i++) cout << arr[i] << " "; cout << endl;
+
+    swapEvenOdd(arr, size);
+    cout << "Swap Even/Odd: "; for (int i = 0; i < size; i++) cout << arr[i] << " "; cout << endl;
+
+    shiftLeftRecursive(arr, size, 2);
+    cout << "Shift Left x2: "; for (int i = 0; i < size; i++) cout << arr[i] << " "; cout << endl;
+
+    bubbleSort(arr, size);
+    cout << "Sorted: "; for (int i = 0; i < size; i++) cout << arr[i] << " "; cout << endl;
+
+    int** grid = createSudokuGrid();
+    cout << "\nПуста сітка Судоку:\n";
+    printGrid(grid);
+    deleteSudokuGrid(grid);
+
+    return 0;
+}
